@@ -22,7 +22,7 @@ def show_info(aname, a):
 
 DURATION = 1
 BEGIN = 5
-cnt = 241
+cnt = 341
 plt.figure()
 for root, dirs, files in os.walk("."):  
     for i in files:
@@ -43,4 +43,5 @@ for root, dirs, files in os.walk("."):
             plt.grid(True)
 plt.subplots_adjust(top=0.92, bottom=0.08, left=0.10, right=0.95, hspace=0.25,
                     wspace=0.35)
+#plt.savefig("figure.jpeg")
 plt.show()

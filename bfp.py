@@ -32,12 +32,13 @@ for root, dirs, files in os.walk("."):
             data = data.astype(np.int16)
             show_info("input",data)
             # обратите внимание на r в начале имён функций
-            yf = rfft(data)
+            yf = rfft(data)/ len(data)
             xf = rfftfreq(DURATION * SAMPLE_RATE, 1/SAMPLE_RATE)
-            plt.subplot(cnt)
+            plt.subplots()
             plt.xlabel('freq')
             plt.ylabel('power')
             cnt +=1
+            print(xf.shape)
             plt.plot(xf, np.abs(yf))
             plt.title(i)
             plt.grid(True)

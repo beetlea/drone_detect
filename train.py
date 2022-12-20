@@ -99,7 +99,7 @@ main_ds.element_spec
 def load_wav_for_map(filename, label, fold):
   return load_wav_16k_mono(filename), label, fold
 
-main_ds = main_ds.map(load_wav_for_map)
+main_ds =  .map(load_wav_for_map)
 main_ds.element_spec
 
 
@@ -189,15 +189,37 @@ embedding_extraction_layer = hub.KerasLayer(yamnet_model_handle,
                                             trainable=False, name='yamnet')
 _, embeddings_output, _ = embedding_extraction_layer(input_segment)
 serving_outputs = my_model(embeddings_output)
-#serving_outputs = ReduceMeanLayer(axis=0, name='classifier')(serving_outputs)
+serving_outputs = ReduceMeanLayer(axis=0, name='classifier')(serving_outputs)
 serving_model = tf.keras.Model(input_segment, serving_outputs)
-'''
-converter = tf.lite.TFLiteConverter.from_keras_model(serving_model)
-converter.optimizations = [tf.lite.Optimize.DEFAULT]
+serving_model.save('/tmp/model.ckpt')
+
+SAVED_MODEL_DIR = '/tmp/model.ckpt'
+
+tf.saved_model.save(
+    serving_model,
+    SAVED_MODEL_DIR,
+    signatures={
+        'train':
+            serving_model.train.get_concrete_function(),
+        'infer':
+            serving_model.infer.get_concrete_function(),
+        'save':
+            serving_model.save.get_concrete_function(),
+        'restore':
+            serving_model.restore.get_concrete_function(),
+    })
+#converter = tf.lite.TFLiteConverter.from_keras_model(serving_model)
+converter = tf.lite.TFLiteConverter.from_saved_model(SAVED_MODEL_DIR)
+converter.target_spec.supported_ops = [
+    tf.lite.OpsSet.TFLITE_BUILTINS,  # enable TensorFlow Lite ops.
+    tf.lite.OpsSet.SELECT_TF_OPS  # enable TensorFlow ops.
+]
+#converter.optimizations = [tf.lite.Optimize.DEFAULT]
+converter.experimental_enable_resource_variables = True
 tflite_model = converter.convert()
-with open('model.tflite', 'wb') as f:
+with open('model_15_12_22.tflite', 'wb') as f:
     f.write(tflite_model)
-'''
+
 #serving_model.save(saved_model_path, include_optimizer=False)
 
 tf.keras.utils.plot_model(serving_model)

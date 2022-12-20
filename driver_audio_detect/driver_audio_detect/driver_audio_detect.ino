@@ -17,6 +17,31 @@ volatile byte start_y = 0;
 volatile byte start_x = 0;
 
 
+
+
+// setting PWM properties
+const int freq = 1000;
+const int ledChannel_x = 0;
+const int ledChannel_y = 1;
+const int resolution = 8;
+ 
+void init_timer_x(){
+  // configure LED PWM functionalitites
+  ledcSetup(ledChannel_x, freq, resolution);
+  
+  // attach the channel to the GPIO to be controlled
+  ledcAttachPin(AXIS_X, ledChannel_x);
+}
+
+void init_timer_y(){
+  // configure LED PWM functionalitites
+  ledcSetup(ledChannel_y, freq, resolution);
+  
+  // attach the channel to the GPIO to be controlled
+  ledcAttachPin(AXIS_Y, ledChannel_y);
+}
+
+/*
 volatile byte state_x = LOW;
 void IRAM_ATTR   timer_x_handler(){
   state_x = !state_x;
@@ -25,19 +50,13 @@ void IRAM_ATTR   timer_x_handler(){
 
 void init_timer_x()
 {
-
-    /* Use 1st timer of 4 */
-  /* 1 tick take 1/(80MHZ/80) = 1us so we set divider 80 and count up */
   timer_x = timerBegin(0, 80, true);
-  /* Attach onTimer function to our timer */
+
   timerAttachInterrupt(timer_x, &timer_x_handler, true);
 
-  /* Set alarm to call onTimer function every second 1 tick is 1us
-  => 1 second is 1000000us */
-  /* Repeat the alarm (third parameter) */
   timerAlarmWrite(timer_x, 5000, true);
 
-  /* Start an alarm */
+
   ///timerAlarmEnable(timer_x);
  
 }
@@ -51,18 +70,9 @@ void  IRAM_ATTR  timer_y_handler(){
 
 void init_timer_y()
 {
-
-    /* Use 1st timer of 4 */
-  /* 1 tick take 1/(80MHZ/80) = 1us so we set divider 80 and count up */
   timer_y = timerBegin(1, 80, true);
-  /* Attach onTimer function to our timer */
   timerAttachInterrupt(timer_y, &timer_y_handler, true);
-  timerGetAutoReload(timer_y);
-  /* Set alarm to call onTimer function every second 1 tick is 1us
-  => 1 second is 1000000us */
-  /* Repeat the alarm (third parameter) */
   timerAlarmWrite(timer_y, 5000, true);
-
   ///timerAlarmEnable(timer_y);
 
 }
@@ -82,12 +92,12 @@ void stop_motor(int pin)
   
   digitalWrite(pin, HIGH);
 }
-
+*/
 
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
-  
+  Serial.setTimeout(80);
   pinMode(AXIS_Y, OUTPUT);
   pinMode(AXIS_X, OUTPUT);
   digitalWrite(AXIS_Y, HIGH);
@@ -113,7 +123,7 @@ void loop() {
       dir_y = LOW;
       digitalWrite(DIR_Y, dir_y);
       delay(10);
-      timerAlarmEnable(timer_y);
+      ledcWrite(ledChannel_y, 127);
       Serial.println("ok");
     }
 
@@ -122,14 +132,14 @@ void loop() {
       dir_y = HIGH;
       digitalWrite(DIR_Y, dir_y);
       delay(10);
-      timerAlarmEnable(timer_y);
+      ledcWrite(ledChannel_y, 127);
       Serial.println("ok");
     }
 
     if(data.indexOf("YSTOP") != -1)
     {
       digitalWrite(AXIS_Y, HIGH);
-      timerAlarmDisable(timer_y);
+      ledcWrite(ledChannel_y, 0);
       Serial.println("ok");
     }
 
@@ -137,26 +147,27 @@ void loop() {
     
     if(data.indexOf("XLEFT") != -1)
     {
-      dir_x = LOW;
+      dir_x = HIGH;
       digitalWrite(DIR_X, dir_x);
       delay(10);
-      timerAlarmEnable(timer_x);
+      ledcWrite(ledChannel_x, 127);
       Serial.println("ok");
     }
 
     if(data.indexOf("XRIGTH") != -1)
     {
-      dir_x = HIGH;
+      dir_x = LOW;
       digitalWrite(DIR_X, dir_x);
       delay(10);
-      timerAlarmEnable(timer_x);
+      ledcWrite(ledChannel_x, 127);
       Serial.println("ok");
     }
 
     if(data.indexOf("XSTOP") != -1)
     {
       digitalWrite(AXIS_X, HIGH);
-      timerAlarmDisable(timer_x);
+      ///timerAlarmDisable(timer_x);
+      ledcWrite(ledChannel_x, 0);
       Serial.println("ok");
     }
 

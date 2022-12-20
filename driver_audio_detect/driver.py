@@ -1,12 +1,13 @@
-import serial.tools.list_ports
 import serial
+import serial.tools.list_ports
+
 
 from tkinter import *
 from tkinter import ttk
 
 import threading, time
 
-import pygame 
+
 
 root = Tk()
 root.title("Driver")
@@ -48,30 +49,31 @@ button_up  = False
 
 m = 0
 rigth = 39
-up = 38
-down = 40
+up1 = 38
+down1 = 40
 left = 37
 
 def down(e):
-    global m
+    global m,left, rigth, down1, up1
     if m == 0:
+        print(e.keycode)
         if e.keycode == left:
             s.write(str.encode("XLEFT\n"))
-            print("dgdfg")
+            print("left")
         if e.keycode == rigth:
             s.write(str.encode("XRIGTH\n"))
-            print("dgdfg")
+            print("rigth")
 
-        if e.keycode == up:
+        if e.keycode == up1:
             s.write(str.encode("YUP\n"))
-            print("dgdfg")
-        if e.keycode == down:
+            print("up")
+        if e.keycode == down1:
             s.write(str.encode("YDOWN\n"))
-            print("dgdfg")
+            print("down")
         m = 1
 
 def up(e):
-    global m
+    global m,left, rigth, down1, up1
     if m == 1:
         if e.keycode == left:
             s.write(str.encode("XSTOP\n"))
@@ -80,10 +82,10 @@ def up(e):
             s.write(str.encode("XSTOP\n"))
             print("dgdfg")
 
-        if e.keycode == up:
+        if e.keycode == up1:
             s.write(str.encode("YSTOP\n"))
             print("dgdfg")
-        if e.keycode == down:
+        if e.keycode == down1:
             s.write(str.encode("YSTOP\n"))
             print("dgdfg")        
         m = 0
